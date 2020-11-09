@@ -1,0 +1,83 @@
+<resources>
+    <string name="app_name">Aplikasi Ukur</string>
+    <string name="app_title">Aplikasi Ukur v1.0</string>
+
+
+    <string name="title">Judul</string>
+
+    <string name="length">Panjang (cm)</string>
+    <string name="width">Lebar (cm)</string>
+    <string name="height">Tinggi (cm)</string>
+    <string name="wheel_base">Wheel Base (cm)</string>
+    <string name="foh">FOH (cm)</string>
+    <string name="roh">ROH (cm)</string>
+    <string name="approach_angle">Sudut Datang</string>
+    <string name="departure_angle">Sudut Pergi</string>
+
+
+    <string name="hint_length">Panjang</string>
+    <string name="hint_width">Lebar</string>
+    <string name="hint_height">Tinggi</string>
+    <string name="hint_wheel_base">Wheel Base</string>
+    <string name="hint_foh">FOH</string>
+    <string name="hint_roh">ROH</string>
+    <string name="hint_approach_angle">Sudut Datang</string>
+    <string name="hint_departure_angle">Sudut Pergi</string>
+
+
+    <string name="close">Tutup</string>
+    <string name="previous">Ukur</string>
+    <string name="next">Simpan</string>
+    <string name="delete">Hapus</string>
+    <string name="save">Simpan</string>
+    <string name="btn_new_label">Pengukuran Baru</string>
+    <string name="btn_list_label">Daftar Pengukuran</string>
+    <string name="btn_about_label">Tentang</string>
+    <string name="btn_exit_label">Keluar</string>
+
+
+    <string name="connected">Terhubung</string>
+    <string name="disconnected">Tidak Terhubung</string>
+    <string name="connecting">Menghubungkan</string>
+    <string name="list_empty_label">Tidak Ada Data</string>
+    <string name="settings">Pengaturan</string>
+    <string name="btn_check_label">Check</string>
+    <string name="start">Mulai</string>
+    <string name="scan">Scan</string>
+
+    <string name="status_icon_desc">Status Icon</string>
+    <string name="hw_address">ws://localhost</string>
+    <string name="date_dumy">Saturday, 20/12/2020 20:20:20</string>
+    <string name="list_length_label">P a n j a n g</string>
+    <string name="list_width_label">L e b a r</string>
+    <string name="list_height_label">T i n g g i</string>
+    <string name="current_unit">cm</string>
+
+    <string name="settings_get_started_label">Selalu Tampilkan Panduan</string>
+    <string name="settings_get_started_summary">Selalu Tampilkan Panduan Saat Memulai Aplikasi</string>
+    <string name="settings_reset_label">Reset Pengaturan</string>
+    <string name="settings_reset_summary">Reset Semua Pengaturan ke Default</string>
+    <string name="settings_hardware_address_label">Almat Hardware</string>
+    <string name="settings_hardware_address_summary">Alamat WebSocket Hardware</string>
+
+    <string name="settings_category_hardware_label">Hardware</string>
+    <string name="settings_category_general_label">General</string>
+
+    <string name="error_msg_title_empty">Judul Tidak Boleh Kosong</string>
+    <string name="error_msg_field_empty_or_less_zero">$ Tidak Boleh Kosong atau Bernilai Minuscr</string>
+
+    <string name="toast_msg_create_completed">Input Data $ Berhasil</string>
+    <string name="toast_msg_delete_completed">Menghapus Data $ Berhasil</string>
+    <string name="toast_msg_update_completed">Mengubah Data $ Berhasil</string>
+    <string name="toast_msg_back_twice_to_exit">"Tekan Back Lagi Untuk Keluar Aplikasi"</string>
+
+    <string name="question_delete_title">Hapus Data</string>
+    <string name="question_delete">Apakah Anda Yakin Ingin Menghapus Data Ini?</string>
+
+    <string name="btn_yes">Ya</string>
+    <string name="btn_cancel">Batal</string>
+    <string name="app_version">V1.1</string>
+    <string name="app_icon">App Icon</string>
+
+
+</resources>

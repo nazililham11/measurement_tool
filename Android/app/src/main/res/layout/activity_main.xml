@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    >
+
+    <Button
+        android:id="@+id/btn_new"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_new_label"
+        android:layout_margin="10dp"
+        android:background="@color/blue"
+        android:textColor="@android:color/white"
+        />
+
+    <Button
+        android:id="@+id/btn_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_list_label"
+        android:layout_margin="10dp"
+        android:background="@color/blue"
+        android:textColor="@android:color/white"
+        />
+
+    <Button
+        android:id="@+id/btn_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/settings"
+        android:layout_margin="10dp"
+        android:background="@color/blue"
+        android:textColor="@android:color/white"
+        />
+
+    <Button
+        android:id="@+id/btn_check"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_check_label"
+        android:layout_margin="10dp"
+        android:background="@color/blue"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
+        />
+
+    <Button
+        android:id="@+id/btn_about"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_about_label"
+        android:layout_margin="10dp"
+        android:background="@color/blue"
+        android:textColor="@android:color/white"
+        />
+
+    <Button
+        android:id="@+id/btn_exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_exit_label"
+        android:layout_margin="10dp"
+        android:background="@color/blue"
+        android:textColor="@android:color/white"
+        />
+
+</LinearLayout>

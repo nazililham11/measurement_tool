@@ -1,0 +1,42 @@
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <PreferenceCategory
+        app:title="@string/settings_category_general_label"
+        app:iconSpaceReserved="false"
+        >
+
+        <SwitchPreferenceCompat
+            app:key="show_get_started_screen"
+            app:title="@string/settings_get_started_label"
+            app:summary="@string/settings_get_started_summary"
+            app:iconSpaceReserved="false"
+            />
+
+        <Preference
+            app:key="reset_default"
+            app:title="@string/settings_reset_label"
+            app:summary="@string/settings_reset_summary"
+            app:iconSpaceReserved="false"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/settings_category_hardware_label"
+        app:iconSpaceReserved="false"
+        >
+
+        <EditTextPreference
+            app:key="hardware_address"
+            app:dialogTitle="@string/settings_hardware_address_label"
+            app:summary="@string/settings_hardware_address_summary"
+            app:title="@string/settings_hardware_address_label"
+            app:iconSpaceReserved="false"
+            />
+
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
