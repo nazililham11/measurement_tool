@@ -1,4 +1,4 @@
-package com.example.measurementtool
+package com.myapps.measurementtool
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

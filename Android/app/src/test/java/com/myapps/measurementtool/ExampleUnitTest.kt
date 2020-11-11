@@ -1,4 +1,4 @@
-package com.example.measurementtool
+package com.myapps.measurementtool
 
 import org.junit.Test
 

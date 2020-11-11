@@ -1,4 +1,4 @@
-package com.example.measurementtool
+package com.myapps.measurementtool
 
 import android.content.Intent
 import android.os.Bundle
@@ -51,8 +51,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed()
-            return
+            moveTaskToBack(true)
+            exitProcess(-1)
         }
         this.doubleBackToExitPressedOnce = true
         val msg = getString(R.string.toast_msg_back_twice_to_exit)

@@ -1,4 +1,4 @@
-package com.example.measurementtool
+package com.myapps.measurementtool
 
 import android.content.Intent
 import android.os.Bundle

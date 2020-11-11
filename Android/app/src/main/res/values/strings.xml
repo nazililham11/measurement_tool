@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Aplikasi Ukur</string>
-    <string name="app_title">Aplikasi Ukur v1.0</string>
+    <string name="app_name">Aplikasi</string>
+    <string name="app_title">Aplikasi v1.0</string>
 
 
     <string name="title">Judul</string>
@@ -57,14 +57,14 @@
     <string name="settings_get_started_summary">Selalu Tampilkan Panduan Saat Memulai Aplikasi</string>
     <string name="settings_reset_label">Reset Pengaturan</string>
     <string name="settings_reset_summary">Reset Semua Pengaturan ke Default</string>
-    <string name="settings_hardware_address_label">Almat Hardware</string>
+    <string name="settings_hardware_address_label">Alamat Hardware</string>
     <string name="settings_hardware_address_summary">Alamat WebSocket Hardware</string>
 
     <string name="settings_category_hardware_label">Hardware</string>
     <string name="settings_category_general_label">General</string>
 
     <string name="error_msg_title_empty">Judul Tidak Boleh Kosong</string>
-    <string name="error_msg_field_empty_or_less_zero">$ Tidak Boleh Kosong atau Bernilai Minuscr</string>
+    <string name="error_msg_field_empty_or_less_zero">$ Tidak Boleh Kosong atau Bernilai Minus</string>
 
     <string name="toast_msg_create_completed">Input Data $ Berhasil</string>
     <string name="toast_msg_delete_completed">Menghapus Data $ Berhasil</string>

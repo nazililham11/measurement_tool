@@ -1,4 +1,4 @@
-package com.example.measurementtool
+package com.myapps.measurementtool
 
 import android.annotation.SuppressLint
 import android.os.Bundle
