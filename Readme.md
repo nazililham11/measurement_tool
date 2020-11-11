@@ -11,4 +11,4 @@
 
 
 ## Skema
-![Skema v1.1](Assets/skema.png)
+![Skema v1.1](Assets/Skema.png)
