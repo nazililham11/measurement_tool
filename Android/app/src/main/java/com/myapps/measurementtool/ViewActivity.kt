@@ -1,9 +1,21 @@
 package com.myapps.measurementtool
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ContentValues
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.text.Editable
 import android.util.Log
 import android.view.View
@@ -13,12 +25,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
+import java.io.File
 import java.net.URI
 import java.text.SimpleDateFormat
 
 class ViewActivity : AppCompatActivity() {
 
-//    private lateinit var tvId:              TextView
     private lateinit var tvDate:            TextView
     private lateinit var tvStatus:          TextView
     private lateinit var tvStatusSummary:   TextView
@@ -41,18 +53,28 @@ class ViewActivity : AppCompatActivity() {
 
     private lateinit var measurement:       Measurement
     private lateinit var hardwareProvider:  HardwareProvider
-    private lateinit var numbersField:      Array<EditText>
     private lateinit var sharePrefs:        SharePrefs
     private lateinit var mainHandler:       Handler
 
-    private var isScanning = false
+    private var enableScan: Boolean = false
+        set(value) {
+             if (value){
+                 btnScan.isEnabled = true
+                 btnScan.alpha = 1F
+             } else {
+                 btnScan.isEnabled = false
+                 btnScan.alpha = 0.5F
+             }
+            field = value
+        }
+    private var isScanning: Boolean = false
+
     private val scanTimeoutTask = Runnable {
         if (isScanning){
             Toast.makeText(this@ViewActivity, "Connection Timeout", Toast.LENGTH_LONG).show()
             setConnectionStatus(ConnectionStatus.DISCONNECT)
             isScanning = false
-            btnScan.isEnabled = false
-            btnScan.alpha = 0.5F
+            enableScan = false
         }
     }
 
@@ -60,14 +82,12 @@ class ViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view)
 
+        sharePrefs = SharePrefs(this)
+        mainHandler = Handler(Looper.getMainLooper())
+
         bindToUI()
 
-        mainHandler = Handler(Looper.getMainLooper())
-        sharePrefs = SharePrefs(this)
-        setConnectionStatus(ConnectionStatus.CONNECTING)
-        hardwareProvider = HardwareProvider(URI(sharePrefs.hardwareAddress))
-        hardwareProvider.connectionLostTimeout = 2500
-        hardwareProvider.connect()
+        initHardwareProvider()
 
         val id = intent.getIntExtra("id", 0)
         if (id < 1) finish()
@@ -75,29 +95,40 @@ class ViewActivity : AppCompatActivity() {
         val measurementProvider = MeasurementsProvider(this)
         this.measurement = measurementProvider.readById(id)
 
-        fillToUI(this.measurement)
+        setFieldValues(this.measurement)
 
     }
 
-    private fun getFromUI(): Measurement {
+
+    override fun onPause() {
+        super.onPause()
+        mainHandler.removeCallbacks(scanTimeoutTask)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+//        hardwareProvider.onDestroy()
+    }
+
+    private fun getFieldValues(): Measurement {
         return Measurement(
             id              = this.measurement.id,
+            photo           = "",
             title           = etTitle.text.toString(),
-            length          = etLength.text.toString().fullTrim().toDouble(),
-            width           = etWidth.text.toString().fullTrim().toDouble(),
-            height          = etHeight.text.toString().fullTrim().toDouble(),
-            wheel_base      = etWheelBase.text.toString().fullTrim().toDouble(),
-            foh             = etFOH.text.toString().fullTrim().toDouble(),
-            roh             = etROH.text.toString().fullTrim().toDouble(),
-            approach_angle  = etApproachAngle.text.toString().fullTrim().toDouble(),
-            departure_angle = etDepartureAngle.text.toString().fullTrim().toDouble(),
+            length          = getFieldDoubleValue(etLength),
+            width           = getFieldDoubleValue(etWidth),
+            height          = getFieldDoubleValue(etHeight),
+            wheel_base      = getFieldDoubleValue(etWheelBase),
+            foh             = getFieldDoubleValue(etFOH),
+            roh             = getFieldDoubleValue(etROH),
+            approach_angle  = getFieldDoubleValue(etApproachAngle),
+            departure_angle = getFieldDoubleValue(etDepartureAngle),
             date            = this.measurement.date
         )
     }
 
     @SuppressLint("SetTextI18n", "SimpleDateFormat")
-    private fun fillToUI(measurement: Measurement) {
-        //        tvId.text             = "ID ${measurement.id}"
+    private fun setFieldValues(measurement: Measurement) {
         tvDate.text           = SimpleDateFormat("dd/MM/yyy hh:mm:ss").format(measurement.date)
         etTitle.text          = measurement.title.toEditable()
         etLength.text         = measurement.length.toString().toEditable()
@@ -131,44 +162,45 @@ class ViewActivity : AppCompatActivity() {
         btnDelete        = findViewById(R.id.btn_delete)
         btnScan          = findViewById(R.id.btn_scan)
 
-        numbersField        = arrayOf(etLength, etWidth, etHeight, etWheelBase, etFOH, etROH, etApproachAngle, etDepartureAngle)
+        tvStatusSummary.text = sharePrefs.hardwareAddress
 
-        btnDelete.setOnClickListener {
-            val dialogBuilder = AlertDialog.Builder(this)
-            val yesLabel = getString(R.string.btn_yes)
-            val cancelLabel = getString(R.string.btn_cancel)
-            val question = getString(R.string.question_delete)
-            val title = getString(R.string.question_delete_title)
+        btnDelete.setOnClickListener { showDeleteDialog() }
+        btnSave.setOnClickListener { saveChanges() }
+        btnScan.setOnClickListener { scanDevice() }
+    }
 
-            dialogBuilder.setMessage(question)
-                .setCancelable(false)
-                .setPositiveButton(yesLabel) { _, _ -> deleteData() }
-                .setNegativeButton(cancelLabel) { dialog, _ -> dialog.cancel() }
+    private fun saveChanges(){
+        val measurement = getFieldValues()
+        val validation = measurement.validate(this)
 
-            val alert = dialogBuilder.create()
-            alert.setTitle(title)
-            alert.show()
-        }
-
-        btnSave.setOnClickListener {
+        if (validation.isError){
+            Toast.makeText(this@ViewActivity, validation.errorMessage, Toast.LENGTH_LONG).show()
+        } else {
             val measurementsProvider = MeasurementsProvider(this)
-            val measurement = getFromUI()
             val result = measurementsProvider.update(measurement)
             if (result) {
                 val message = getString(R.string.toast_msg_update_completed).replace("$", measurement.title)
                 Toast.makeText(this@ViewActivity, message, Toast.LENGTH_SHORT).show()
+                finish()
             }
         }
+    }
 
-        btnScan.setOnClickListener {
-            btnScan.isEnabled = false
-            btnScan.alpha = 0.5F
-            isScanning = true
-            mainHandler.postDelayed(scanTimeoutTask, 5000)
+    private fun showDeleteDialog(){
+        val dialogBuilder = AlertDialog.Builder(this)
+        val yesLabel = getString(R.string.btn_yes)
+        val cancelLabel = getString(R.string.btn_cancel)
+        val question = getString(R.string.question_delete)
+        val title = getString(R.string.question_delete_title)
 
-            if (hardwareProvider.isOpen) hardwareProvider.send("ping")
-        }
+        dialogBuilder.setMessage(question)
+            .setCancelable(false)
+            .setPositiveButton(yesLabel) { _, _ -> deleteData() }
+            .setNegativeButton(cancelLabel) { dialog, _ -> dialog.cancel() }
 
+        val alert = dialogBuilder.create()
+        alert.setTitle(title)
+        alert.show()
     }
 
     private fun deleteData(){
@@ -181,21 +213,38 @@ class ViewActivity : AppCompatActivity() {
         }
     }
 
-    private fun messageCallback(value: Double){
-        val editableValue = value.toString().fullTrim().toEditable()
+
+
+    private fun initHardwareProvider(){
+        setConnectionStatus(ConnectionStatus.CONNECTING)
+        hardwareProvider = HardwareProvider(URI(sharePrefs.hardwareAddress))
+        hardwareProvider.connectionChangedCallback = { status -> setConnectionStatus(status) }
+        hardwareProvider.reciveMessageCallback = { message -> onMessageRecived(message) }
+        hardwareProvider.connectionLostTimeout = 2500
+        hardwareProvider.connect()
+    }
+
+    private fun scanDevice(){
+        enableScan = false
+        isScanning = true
+        mainHandler.postDelayed(scanTimeoutTask, 5000)
+        hardwareProvider.scanDistance()
+    }
+
+    private fun onMessageRecived(msg: String?){
+        val stringValue = msg?.replace("Distance: ", "")?.trim()
+        val value: Double = stringValue?.fullTrim()?.toDouble() ?: 0.0
 
         runOnUiThread {
             if (isScanning){
                 mainHandler.removeCallbacks(scanTimeoutTask)
                 isScanning = false
-                btnScan.isEnabled = true
-                btnScan.alpha = 1F
+                enableScan = true
             }
 
-            // Fill to Focused Field
-            for (field in numbersField) {
+            for (field in numbersField()) {
                 if(field.isFocused){
-                    field.text = editableValue
+                    field.text = value.toString().fullTrim().toEditable()
                     break
                 }
             }
@@ -210,64 +259,40 @@ class ViewActivity : AppCompatActivity() {
                     tvStatus.text = resources.getString(R.string.connected)
                     icStatus.setImageResource(R.drawable.ic_baseline_check_24)
                     icStatus.visibility = View.VISIBLE
-                    tvStatusSummary.text = sharePrefs.hardwareAddress
                     pbStatus.visibility = View.GONE
-                    btnScan.isEnabled = true
-                    btnScan.alpha = 1F
+                    enableScan = true
                 }
                 ConnectionStatus.DISCONNECT -> {
                     lytStatus.setBackgroundColor(ContextCompat.getColor(this, R.color.red))
                     tvStatus.text = resources.getString(R.string.disconnected)
                     icStatus.setImageResource(R.drawable.ic_baseline_clear_24)
                     icStatus.visibility = View.VISIBLE
-                    tvStatusSummary.text = sharePrefs.hardwareAddress
                     pbStatus.visibility = View.GONE
-                    btnScan.isEnabled = false
-                    btnScan.alpha = 0.5F
+                    enableScan = false
                 }
                 ConnectionStatus.CONNECTING -> {
                     lytStatus.setBackgroundColor(ContextCompat.getColor(this, R.color.gray))
                     tvStatus.text = resources.getString(R.string.connecting)
-                    tvStatusSummary.text = sharePrefs.hardwareAddress
                     icStatus.visibility = View.GONE
                     pbStatus.visibility = View.VISIBLE
-                    btnScan.isEnabled = false
-                    btnScan.alpha = 0.5F
+                    enableScan = false
                 }
             }
         }
     }
 
+
+    // Helpers
     private fun String.fullTrim() = trim().replace("\uFEFF", "")
     private fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
-
-    inner class HardwareProvider(serverUri: URI?) : WebSocketClient(serverUri) {
-
-        override fun onOpen(handshakedata: ServerHandshake?) {
-            setConnectionStatus(ConnectionStatus.CONNECTED)
-        }
-
-        override fun onClose(code: Int, reason: String?, remote: Boolean) {
-            setConnectionStatus(ConnectionStatus.DISCONNECT)
-        }
-
-        override fun onMessage(message: String?) {
-            val stringValue = message?.replace("Distance: ", "")?.trim()
-            val value: Double = stringValue?.fullTrim()?.toDouble() ?: 0.0
-            messageCallback(value)
-        }
-
-        override fun onError(ex: Exception?) {
-            Log.d("HardwareProvider", ex?.message.toString())
-        }
-
-
+    private fun numbersField(): Array<EditText> {
+        return arrayOf(etLength, etWidth, etHeight, etWheelBase, etFOH, etROH, etApproachAngle, etDepartureAngle)
     }
-
-    enum class ConnectionStatus{
-        DISCONNECT,
-        CONNECTED,
-        CONNECTING
+    private fun getFieldDoubleValue(field: EditText): Double {
+        val text = field.text.toString()
+        if (text.isNullOrBlank())
+            return 0.0
+        return text.fullTrim().toDouble()
     }
 
 }

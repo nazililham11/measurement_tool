@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.os.health.PackageHealthStats
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -16,6 +17,7 @@ class MeasurementsProvider(context: Context)
         private const val DB_NAME 			  = "dataset"
         private const val TABLE_NAME 		  = "measurements"
         private const val COL_ID 			  = "_id"
+        private const val COL_PHOTO 		  = "photo"
         private const val COL_TITLE 		  = "title"
         private const val COL_LENGTH 		  = "length"
         private const val COL_WIDTH 		  = "width"
@@ -33,6 +35,7 @@ class MeasurementsProvider(context: Context)
         val CREATE_TABLE = "CREATE TABLE $TABLE_NAME (" +
                 "$COL_ID              INTEGER PRIMARY KEY," +
                 "$COL_TITLE           TEXT," +
+                "$COL_PHOTO           TEXT," +
                 "$COL_LENGTH          DOUBLE," +
                 "$COL_WIDTH           DOUBLE," +
                 "$COL_HEIGHT          DOUBLE," +
@@ -56,6 +59,7 @@ class MeasurementsProvider(context: Context)
         val db = this.writableDatabase
         val values = ContentValues()
         values.put(COL_TITLE,           measurement.title)
+        values.put(COL_PHOTO,           measurement.photo)
         values.put(COL_LENGTH,          measurement.length)
         values.put(COL_WIDTH,           measurement.width)
         values.put(COL_HEIGHT,          measurement.height)
@@ -82,6 +86,7 @@ class MeasurementsProvider(context: Context)
             while (cursor.moveToNext()) {
                 measurement.id              = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COL_ID)))
                 measurement.title           = cursor.getString(cursor.getColumnIndex(COL_TITLE))
+                measurement.photo           = cursor.getString(cursor.getColumnIndex(COL_PHOTO))
                 measurement.length          = cursor.getString(cursor.getColumnIndex(COL_LENGTH)).fullTrim().toDouble()
                 measurement.width           = cursor.getString(cursor.getColumnIndex(COL_WIDTH)).fullTrim().toDouble()
                 measurement.height          = cursor.getString(cursor.getColumnIndex(COL_HEIGHT)).fullTrim().toDouble()
@@ -108,6 +113,7 @@ class MeasurementsProvider(context: Context)
                     val measurement = Measurement()
                     measurement.id              = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COL_ID)))
                     measurement.title           = cursor.getString(cursor.getColumnIndex(COL_TITLE))
+                    measurement.photo           = cursor.getString(cursor.getColumnIndex(COL_PHOTO))
                     measurement.length          = cursor.getString(cursor.getColumnIndex(COL_LENGTH)).fullTrim().toDouble()
                     measurement.width           = cursor.getString(cursor.getColumnIndex(COL_WIDTH)).fullTrim().toDouble()
                     measurement.height          = cursor.getString(cursor.getColumnIndex(COL_HEIGHT)).fullTrim().toDouble()
@@ -128,6 +134,7 @@ class MeasurementsProvider(context: Context)
         val db = this.writableDatabase
         val values = ContentValues()
         values.put(COL_TITLE,           measurement.title)
+        values.put(COL_PHOTO,           measurement.photo)
         values.put(COL_LENGTH,          measurement.length)
         values.put(COL_WIDTH,           measurement.width)
         values.put(COL_HEIGHT,          measurement.height)

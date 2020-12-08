@@ -15,7 +15,7 @@ class SharePrefs(context: Context) {
 
         private val sharedPrefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
 
-        val defHardwareAddress = "ws://192.168.0.101"
+        val defHardwareAddress = "ws://10.10.10.1"
         var hardwareAddress: String
             get() = sharedPrefs.getString(KEY_HARDWARE_ADDRESS, defHardwareAddress) ?: defHardwareAddress
             set(value) = sharedPrefs.edit().let {

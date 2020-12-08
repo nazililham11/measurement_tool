@@ -63,7 +63,7 @@
     <string name="settings_category_hardware_label">Hardware</string>
     <string name="settings_category_general_label">General</string>
 
-    <string name="error_msg_title_empty">Judul Tidak Boleh Kosong</string>
+    <string name="error_msg_field_empty">$ Tidak Boleh Kosong</string>
     <string name="error_msg_field_empty_or_less_zero">$ Tidak Boleh Kosong atau Bernilai Minus</string>
 
     <string name="toast_msg_create_completed">Input Data $ Berhasil</string>
