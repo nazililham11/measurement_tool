@@ -39,7 +39,7 @@ class ListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val measurementsProvider = MeasurementsProvider(this)
-        val list = measurementsProvider.read
+        val list = measurementsProvider.read()
         tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         listUserAdapter.update(list)
     }

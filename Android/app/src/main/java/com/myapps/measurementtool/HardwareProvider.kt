@@ -10,7 +10,14 @@ class HardwareProvider(serverUri: URI?) : WebSocketClient(serverUri) {
     var connectionChangedCallback: ((status: ConnectionStatus) -> Unit)? = null
     var reciveMessageCallback: ((msg: String?) -> Unit)? = null
 
+    override fun connect() {
+        connectionChangedCallback?.invoke(ConnectionStatus.CONNECTING)
+        Log.d("HardProvider", "Connecting")
+        super.connect()
+    }
+
     override fun onOpen(handshakedata: ServerHandshake?) {
+        Log.d("HardProvider", "Connection Opened")
         connectionChangedCallback?.invoke(ConnectionStatus.CONNECTED)
     }
 
@@ -20,18 +27,23 @@ class HardwareProvider(serverUri: URI?) : WebSocketClient(serverUri) {
     }
 
     override fun onMessage(message: String?) {
-        Log.d("HardProvider", "Got Message"+message.toString())
+        Log.d("HardProvider", "Got Message: "+message.toString())
         reciveMessageCallback?.invoke(message)
     }
 
     override fun onError(ex: Exception?) {
-        Log.e("HardwareProvider", ex?.message.toString())
+        Log.e("HardProvider", ex?.message.toString())
         connectionChangedCallback?.invoke(ConnectionStatus.DISCONNECT)
     }
 
     fun scanDistance(){
         if (this.isOpen)
             this.send("ping")
+    }
+
+    fun onDestroy(){
+        if (this.isOpen)
+            this.close()
     }
 
 }

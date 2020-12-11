@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <NewPing.h>
 
-#define SOFT_AP_MODE
+//#define SOFT_AP_MODE
 
 using namespace websockets;
 
@@ -18,8 +18,8 @@ const uint8_t ECHO_PIN          = 5;
 const uint8_t MAX_DISTANCE      = 500;              //Cm
 const uint8_t SCAN_TIMES        = 60;
 
-const char* WIFI_SSID           = "SoftAP";        //Enter SSID
-const char* WIFI_PASSWORD       = "12345678";      //Enter Password
+const char* WIFI_SSID           = "TP-LINK";        //Enter SSID
+const char* WIFI_PASSWORD       = "wifinerusak";      //Enter Password
 
 const uint8_t WEBSOCKET_PORT    = 80;
 
@@ -32,11 +32,7 @@ NewPing Sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 void setup() {
 	Serial.begin(115200);
 	
-    #ifdef SOFT_AP_MODE 
-        wifi_access_point_start();
-    #else
-	    wifi_connect();
-    #endif
+    wifi_access_point_start();
     websocket_init();
 }
 
@@ -83,21 +79,6 @@ void onEventsCallback(WebsocketsEvent event, String data) {
     }
 }
 
-void wifi_connect(){
-	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-	// Wait some time to connect to wifi
-	for(int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++) {
-        Serial.print(".");
-        delay(1000);
-	}
-	
-	Serial.println("");
-	Serial.println("WiFi connected");
-	Serial.println("IP address: ");
-	Serial.println(WiFi.localIP());   //You can get IP address assigned to ESP
-
-}
 
 void websocket_init(){
 	Server.listen(WEBSOCKET_PORT);

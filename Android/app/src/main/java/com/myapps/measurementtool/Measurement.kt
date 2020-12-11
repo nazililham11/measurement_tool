@@ -58,7 +58,7 @@ data class Measurement(
     }
 
     private fun getEmptyFieldErrorMsg(field_id: Int, isNumeric: Boolean, context: Context): String{
-        val msg = if (isNumeric)
+        val msg = if (!isNumeric)
             context.getString(R.string.error_msg_field_empty)
         else
             context.getString(R.string.error_msg_field_empty_or_less_zero)

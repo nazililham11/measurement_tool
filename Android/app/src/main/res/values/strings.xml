@@ -78,6 +78,9 @@
     <string name="btn_cancel">Batal</string>
     <string name="app_version">V1.1</string>
     <string name="app_icon">App Icon</string>
+    <string name="photo">Foto</string>
+    <string name="take_photo">Ambil Gambar</string>
+    <string name="remove_photo">Remove</string>
 
 
 </resources>
