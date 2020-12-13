@@ -81,6 +81,7 @@
     <string name="photo">Foto</string>
     <string name="take_photo">Ambil Gambar</string>
     <string name="remove_photo">Remove</string>
+    <string name="no_image">Tidak Ada Gambar</string>
 
 
 </resources>

@@ -1,7 +1,6 @@
 package com.myapps.measurementtool
 
 import android.content.Context
-import android.content.res.Resources
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import java.util.*

@@ -4,19 +4,14 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
-import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.webkit.MimeTypeMap
@@ -25,6 +20,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.myapps.measurementtool.Utils.Companion.fullTrim
+import com.myapps.measurementtool.Utils.Companion.toEditable
 import java.io.File
 import java.net.URI
 import java.text.SimpleDateFormat
@@ -106,19 +103,19 @@ class ViewActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (capturedImage != measurement.photo){
-            deleteFileFromPath(capturedImage)
+            Utils.deleteFileFromPath(capturedImage)
         }
         hardwareProvider.onDestroy()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        onCameraPermissionResult(requestCode, permissions, grantResults)
+        onCameraPermissionResult(requestCode, grantResults)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d("PhotoStuff", "onActivityResult")
-        onImageCaptured(requestCode, resultCode, data)
+        onImageCaptured(resultCode)
     }
 
 
@@ -262,8 +259,8 @@ class ViewActivity : AppCompatActivity() {
             if (value.isBlank()){
                 setPhotoVisibility(false)
             } else {
-                getBitmapFromPath(value)?.let { image ->
-                    ivPhoto.setImageBitmap(resizeBitmap(image, 500))
+                Utils.getBitmapFromPath(value)?.let { image ->
+                    ivPhoto.setImageBitmap(Utils.resizeBitmap(image, 500))
                     setPhotoVisibility(true)
                 } ?: run {
                     Toast.makeText(this@ViewActivity, "Image Not Found", Toast.LENGTH_LONG).show()
@@ -303,7 +300,7 @@ class ViewActivity : AppCompatActivity() {
             Toast.makeText(this@ViewActivity, validation.errorMessage, Toast.LENGTH_LONG).show()
         } else {
             if (capturedImage != values.photo){
-                deleteFileFromPath(values.photo)
+                Utils.deleteFileFromPath(values.photo)
                 values.photo = capturedImage
                 measurement.photo = capturedImage
             }
@@ -362,7 +359,7 @@ class ViewActivity : AppCompatActivity() {
     // Camera Methods
     private fun removePhoto(){
         if (capturedImage != measurement.photo){
-            deleteFileFromPath(capturedImage)
+            Utils.deleteFileFromPath(capturedImage)
         }
         capturedImage = ""
     }
@@ -390,7 +387,7 @@ class ViewActivity : AppCompatActivity() {
         return true
     }
 
-    private fun onCameraPermissionResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    private fun onCameraPermissionResult(requestCode: Int, grantResults: IntArray) {
         if (requestCode == PERMISSION_CODE){
             if (grantResults.isNotEmpty() &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -401,13 +398,13 @@ class ViewActivity : AppCompatActivity() {
         }
     }
 
-    private fun onImageCaptured(requestCode: Int, resultCode: Int, data: Intent?) {
+    private fun onImageCaptured(resultCode: Int) {
         Log.d("PhotoStuff", "onImageCaptured")
         if (resultCode == Activity.RESULT_OK){
             Log.d("PhotoStuff", "resultCode OK")
             imageUri?.let { uri ->
                 Log.d("PhotoStuff", "imageUri not null")
-                val path = getRealPathFromURI(this, uri)
+                val path = Utils.getRealPathFromURI(this, uri)
                 path?.let {imagePath -> capturedImage = imagePath }
             }
         }
@@ -434,81 +431,19 @@ class ViewActivity : AppCompatActivity() {
         } catch (ex: Exception){
             Log.e("Error", ex.message.toString())
         }
-//
-//        try {
-//            val file = File(capturedImage)
-//            val uri = Uri.fromFile(file)
-//
-//            if (file.exists()) {
-//                val intent = Intent()
-//                intent.action = Intent.ACTION_VIEW
-//                intent.setDataAndType(uri, "image/*")
-//                startActivity(intent)
-//            }
-//        } catch (ex: Exception){
-//            Log.e("Error", ex.message.toString())
-//        }
     }
 
-
-    // Helpers
-    private fun String.fullTrim() = trim().replace("\uFEFF", "")
-    private fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
-    private fun numbersField(): Array<EditText> = arrayOf(etLength, etWidth, etHeight, etWheelBase, etFOH, etROH, etApproachAngle, etDepartureAngle)
-    private fun getRealPathFromURI(context: Context, uri: Uri): String? {
-        var cursor: Cursor? = null
-        try {
-            val proj = arrayOf(MediaStore.Images.Media.DATA)
-            cursor = context.contentResolver.query(uri, proj, null, null, null)
-            if (cursor != null){
-                val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                cursor.moveToFirst()
-                return cursor.getString(columnIndex)
-            }
-        } finally {
-            cursor?.close()
-        }
-        return null
+    private fun numbersField(): Array<EditText> {
+        return arrayOf(
+            etLength,
+            etWidth,
+            etHeight,
+            etWheelBase,
+            etFOH,
+            etROH,
+            etApproachAngle,
+            etDepartureAngle
+        )
     }
-    private fun getBitmapFromPath(path: String?): Bitmap? {
-        if (!path.isNullOrBlank()){
-            val imgFile = File(path)
-            if(imgFile.exists()) {
-                return BitmapFactory.decodeFile(imgFile.absolutePath)
-            }
-        }
-        return null
-    }
-    private fun deleteFileFromPath(path: String?): Boolean {
-        if (!path.isNullOrBlank()){
-            val file = File(path)
-            if (file.exists())
-                return file.delete()
-        }
-        return false
-    }
-    private fun resizeBitmap(source: Bitmap, maxLength: Int): Bitmap {
-        try {
-            if (source.height >= source.width) {
-                if (source.height <= maxLength) { // if image height already smaller than the required height
-                    return source
-                }
 
-                val aspectRatio = source.width.toDouble() / source.height.toDouble()
-                val targetWidth = (maxLength * aspectRatio).toInt()
-                return Bitmap.createScaledBitmap(source, targetWidth, maxLength, false)
-            } else {
-                if (source.width <= maxLength) { // if image width already smaller than the required width
-                    return source
-                }
-
-                val aspectRatio = source.height.toDouble() / source.width.toDouble()
-                val targetHeight = (maxLength * aspectRatio).toInt()
-
-                return Bitmap.createScaledBitmap(source, maxLength, targetHeight, false)
-            }
-        } catch (e: Exception) {
-            return source
-        }
-    }
 }
