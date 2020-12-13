@@ -18,10 +18,10 @@ class Utils {
         fun getRealPathFromURI(context: Context, uri: Uri): String? {
             var cursor: Cursor? = null
             try {
-                val projection = arrayOf(MediaStore.Images.Media._ID)
+                val projection = arrayOf(MediaStore.Images.Media.DATA)
                 cursor = context.contentResolver.query(uri, projection, null, null, null)
                 if (cursor != null){
-                    val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                    val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                     cursor.moveToFirst()
                     return cursor.getString(columnIndex)
                 }
