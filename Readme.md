@@ -17,7 +17,7 @@ Misal IP Address Pada LCD adalah `192.168.0.100` maka alamat nya `ws://192.168.0
  - LCD I2C Backpack/LCD to I2C Adapter
 
 ### Skema
-![Skema v2](Assets/skema.png)
+![Skema v2](Assets/skema_v2.png)
 
 ### Flowchart Program Arduino
 ![Flowchart Program Arduino v1](Assets/flowchart-arduino.png)
@@ -41,8 +41,8 @@ const char* AP_WIFI_PASSWORD        = "12345678";           //Access Point Passw
 
 ***Konfigurasi Wifi pada mode Station***
 ```
-const char* WIFI_SSID               = "MyWifi";           	//Wifi SSID
-const char* WIFI_PASSWORD           = "12345678";           //Wifi Password
+const char* WIFI_SSID               = "MyWifi";				//Wifi SSID
+const char* WIFI_PASSWORD           = "12345678";			//Wifi Password
 ```
 
 
