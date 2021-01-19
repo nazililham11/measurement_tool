@@ -10,14 +10,15 @@ Misal IP Address Pada LCD adalah `192.168.0.100` maka alamat nya `ws://192.168.0
 
 ### Komponen
  - NodeMCU ESP8266
- - Sensor Ultrasonic
+ - Sensor Jarak Sharp GP2Y0A710K0F 
+ - PCF8591
  - Batterai
  - Saklar
  - LCD 16x2
  - LCD I2C Backpack/LCD to I2C Adapter
 
 ### Skema
-![Skema v2](Assets/skema_v2.png)
+![Skema v2](Assets/skema_v3.png)
 
 ### Flowchart Program Arduino
 ![Flowchart Program Arduino v1](Assets/flowchart-arduino.png)

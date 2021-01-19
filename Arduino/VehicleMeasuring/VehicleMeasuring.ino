@@ -1,9 +1,10 @@
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <NewPing.h>
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
+
+#define PCF8591 (0x90 >> 1)
 
 const char* AP_WIFI_SSID            = "SoftAP";             //Access Point SSID
 const char* AP_WIFI_PASSWORD        = "12345678";           //Access Point Password
@@ -14,11 +15,6 @@ const char* WIFI_PASSWORD           = "12345678";           //Wifi Password
 const IPAddress ap_ipAddress        (10, 10, 10, 1);        //Server IP Address
 const IPAddress ap_gateway          (10, 10, 10, 1);        //Server Gateway
 const IPAddress ap_subnetMask       (255, 255, 255, 0);     //Server Subnetmask                                   
-
-const uint8_t TRIGGER_PIN           = 12;
-const uint8_t ECHO_PIN              = 14;
-const uint8_t MAX_DISTANCE          = 600;                  //Cm
-const uint8_t SCAN_TIMES            = 10;
 
 const uint8_t WEBSOCKET_PORT        = 80;
 
@@ -32,7 +28,6 @@ const uint8_t WIFI_CONNECT_TIMEOUT  = 15;                   //Detik
 unsigned int distance; 
 bool access_point_mode;
 
-NewPing Sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); 
 LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLS, LCD_ROWS);  
 
 // Create AsyncWebServer object on port 80
@@ -47,7 +42,9 @@ void websocket_send_distance();
 void websocket_handle_message(void *arg, uint8_t *data, size_t len);
 void websocket_onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 void websocket_init();
-unsigned int sonar_read();
+uint16_t read_distance_cm();
+uint8_t pcf8591_read();
+uint16_t to_infrared_distance(uint8_t value);
     
 
 void setup(){
@@ -63,7 +60,7 @@ void setup(){
 }
 
 void loop() {
-    distance = sonar_read();
+    distance = read_distance_cm();
     lcd_update();
 
     Serial.println("Distance :"+String(distance));
@@ -136,15 +133,15 @@ void lcd_set_wifi() {
     lcd.print(text);
 }
 
-unsigned int sonar_read() {
-    unsigned long echoTime = Sonar.ping_median(SCAN_TIMES, MAX_DISTANCE);
-    unsigned int distance = NewPing::convert_cm(echoTime);
-
+uint16_t read_distance_cm(){
+    uint8_t adc = pcf8591_read();
+    uint16_t distanceCm = to_infrared_distance(adc);
+    
     Serial.print("Ping: ");
-    Serial.print(distance); 
+    Serial.print(distanceCm); 
     Serial.println("cm");
 
-    return distance;
+    return distanceCm;
 }
 
 void websocket_send_distance_old() {
@@ -210,4 +207,44 @@ void websocket_onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
 void websocket_init() {
     ws.onEvent(websocket_onEvent);
     server.addHandler(&ws);
+}
+
+uint8_t pcf8591_read() {
+    uint8_t adcvalue0, adcvalue1, adcvalue2, adcvalue3;
+
+    Wire.beginTransmission(PCF8591);
+    Wire.write(0x04);
+    Wire.endTransmission();
+    Wire.requestFrom(PCF8591, 5);
+    
+    adcvalue0=Wire.read();
+    adcvalue0=Wire.read();
+    adcvalue1=Wire.read();
+    adcvalue2=Wire.read();
+    adcvalue3=Wire.read();
+    
+    Serial.print(adcvalue0);
+    Serial.print(" ,");
+    Serial.print(adcvalue1); 
+    Serial.print(" ,");
+    Serial.print(adcvalue2); 
+    Serial.print(" ,");
+    Serial.print(adcvalue3); 
+    Serial.println();
+    
+    return adcvalue0;
+}
+
+uint16_t to_infrared_distance(uint8_t value){
+    uint16_t current = map(value, 0, 255, 0, 5000);
+    // use the inverse number of distance like in the datasheet (1/L)
+    // y = mx + b = 137500*x + 1125 
+    // x = (y - 1125) / 137500
+    // Different expressions required as the Photon has 12 bit ADCs vs 10 bit for Arduinos
+    if (current < 1400 || current > 3300) {
+        //false data
+        return 0;
+    } else {
+        return 1.0 / (((current - 1125.0) / 1000.0) / 137.5);
+    }
 }
