@@ -1,8 +1,8 @@
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
+#include <ESP8266WiFi.h>				// Untuk menghubungkan dengan WIFI atau membuat WIFI access point
+#include <ESPAsyncTCP.h>				// Untuk melakukan komunikasi TCP (protokol komunikasi pada jaringan wifi)
+#include <ESPAsyncWebServer.h>			// Untuk menjalankan server WebSocket pada mikrokontroler
+#include <Wire.h> 						// Untuk berkomunikasi melalui protokol I2C (protokol kamunikasi untuk modul LCD dan modul PCF8591)
+#include <LiquidCrystal_I2C.h>			// Untuk berkomunikasi dengan modul LCD dan mempermudah mengoperasikan modul LCD
 
 #define OUT_OF_RANGE 0
 #define PCF8591 (0x90 >> 1)
