@@ -20,6 +20,14 @@ Misal IP Address Pada LCD adalah `192.168.0.100` maka alamat nya `ws://192.168.0
 ### Skema
 ![Skema v2](Assets/skema_v3.png)
 
+
+### Library Program Arduino
+ - [ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
+ - [ESPAsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP)
+ - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
+ - [LiquidCrystal_I2C](https://github.com/johnrickman/LiquidCrystal_I2C)
+
+
 ### Flowchart Program Arduino
 ![Flowchart Program Arduino v1](Assets/flowchart-arduino.png)
 
