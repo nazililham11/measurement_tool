@@ -4,9 +4,20 @@
 #include <Wire.h> 						// Untuk berkomunikasi melalui protokol I2C (protokol kamunikasi untuk modul LCD dan modul PCF8591)
 #include <LiquidCrystal_I2C.h>			// Untuk berkomunikasi dengan modul LCD dan mempermudah mengoperasikan modul LCD
 
+
 #define OUT_OF_RANGE 0
 #define PCF8591 (0x90 >> 1)
 #define DEBUG_BAUD_RATE 115200
+
+// kecepatan suara (20'C)  => 343 m/s => 34300 cm/s 
+// 1 detik = 1000000 micro detik
+// 34300 / 1000000 = 0.0343
+#define SOUND_VELOCITY 0.034
+#define TRIGGER_PIN  12  // Arduino pin tied to trigger pin on the ultrasonic sensor.
+#define ECHO_PIN     14  // Arduino pin tied to echo pin on the ultrasonic sensor.
+#define MAX_SONAR_DISTANCE 100 
+
+//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 
 // ----------------------------------------------------------------------------------------
@@ -45,12 +56,14 @@ const uint8_t LCD_ROWS              = 2;
 unsigned int distance; 
 float voltage;
 bool access_point_mode;
+bool useSonar;
 
 LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLS, LCD_ROWS);  
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 AsyncWebSocket ws("/");
+
 
 void wifi_init();
 void wifi_softap_start();
@@ -63,8 +76,8 @@ void websocket_init();
 uint8_t pcf8591_read();
 uint16_t read_distance_cm();
 uint16_t to_infrared_distance(uint16_t value);
-uint16_t read_median(uint8_t it);   
-
+uint16_t read_median(uint8_t it, bool isSonar);   
+float ping_cm();
 
 
 
@@ -73,7 +86,8 @@ uint16_t read_median(uint8_t it);
 // Inisialisasi Program
 // ----------------------------------------------------------------------------------------
 void setup(){
-
+	pinMode(TRIGGER_PIN, OUTPUT); // Sets the trigPin as an Output
+  	pinMode(ECHO_PIN, INPUT); // Sets the echoPin as an Input
     // Memulai Komunikasi Serial untuk keperluan Debug
     Serial.begin(DEBUG_BAUD_RATE);
   
@@ -94,8 +108,14 @@ void setup(){
 // ----------------------------------------------------------------------------------------
 void loop() {
 
-    // Baca Jarak Sebanyak 100 Kali
-    distance = read_median(100);
+	// Baca Jarak Sebanyak 10 Kali		
+	distance = read_median(10, true);
+	useSonar = true;
+	if (distance > 100){
+    	// Baca Jarak Sebanyak 100 Kali		
+    	distance = read_median(100, false);
+    	useSonar = false;
+	}
 
     // Update Tampilan LCD 
     lcd_update();
@@ -204,8 +224,8 @@ void wifi_softap_start() {
     
     // Tampilkan pesan pada LCD dan konsol serial
 	lcd.clear();
-	lcd_print("W:"+String(AP_WIFI_SSID), 0, 0);
-	lcd_print("P:"+String(AP_WIFI_PASSWORD), 0, 1);
+	lcd_print("SSID:"+String(AP_WIFI_SSID), 0, 0);
+	lcd_print("Pass:"+String(AP_WIFI_PASSWORD), 0, 1);
 
     Serial.print("AP IP address: ");
     Serial.println(WiFi.softAPIP());
@@ -237,7 +257,7 @@ void lcd_update(){
 
     // Tampilan jarak normal
 	if (distance != OUT_OF_RANGE)
-    text = "Jarak: " + String(distance) + " cm        ";
+    text = "Jarak: " + String(distance) + "cm " + (useSonar ? "(U)" : "(I)");
     
     // Tampilan jarak apabila diluar batas pengukuran
     else text = "Jarak: Out Range";
@@ -421,14 +441,17 @@ uint16_t to_infrared_distance(uint16_t value){
 //      Setelah data dirutkan menjadi 100, 150, 220, 225, 330
 //      Setelah diambil nilai tengah/median yaitu 220 cm
 // ----------------------------------------------------------------------------------------
-uint16_t read_median(uint8_t it) {
+uint16_t read_median(uint8_t it, bool isSonar) {
 	uint16_t dist[it], last;
 	uint8_t j, i = 0;
 	dist[0] = OUT_OF_RANGE;
 
 	while (i < it) {
-		last = read_distance_cm();  
-
+    if (isSonar)
+		  last = ping_cm();
+		else 
+		  last = read_distance_cm();  
+    
 		if (last != OUT_OF_RANGE) {      
 			if (i > 0) {            
 				for (j = i; j > 0 && dist[j - 1] < last; j--){
@@ -445,4 +468,18 @@ uint16_t read_median(uint8_t it) {
 		} 
 	}
 	return (dist[it >> 1]); 
+}
+
+
+float ping_cm(){
+	long duration;
+	
+	digitalWrite(TRIGGER_PIN, LOW);
+	delayMicroseconds(2);
+	digitalWrite(TRIGGER_PIN, HIGH);
+	delayMicroseconds(10);
+	digitalWrite(TRIGGER_PIN, LOW);
+	
+	duration = pulseIn(ECHO_PIN, HIGH);
+	return duration * SOUND_VELOCITY / 2;
 }
