@@ -4,20 +4,19 @@
 #include <Wire.h> 						// Untuk berkomunikasi melalui protokol I2C (protokol kamunikasi untuk modul LCD dan modul PCF8591)
 #include <LiquidCrystal_I2C.h>			// Untuk berkomunikasi dengan modul LCD dan mempermudah mengoperasikan modul LCD
 
-
-#define OUT_OF_RANGE 0
-#define PCF8591 (0x90 >> 1)
-#define DEBUG_BAUD_RATE 115200
+#define SENSOR_INFRARED		0
+#define SENSOR_ULTRASONIC	1
+#define OUT_OF_RANGE 		0
+#define PCF8591 			(0x90 >> 1)
+#define DEBUG_BAUD_RATE 	115200
 
 // kecepatan suara (20'C)  => 343 m/s => 34300 cm/s 
-// 1 detik = 1000000 micro detik
-// 34300 / 1000000 = 0.0343
-#define SOUND_VELOCITY 0.034
-#define TRIGGER_PIN  12  // Arduino pin tied to trigger pin on the ultrasonic sensor.
-#define ECHO_PIN     14  // Arduino pin tied to echo pin on the ultrasonic sensor.
-#define MAX_SONAR_DISTANCE 100 
-
-//NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
+// 1 detik = 1000000 uS (micro second)
+// 34300 / 1000000 = 0.0343 cm/uS
+#define SOUND_VELOCITY 		0.034
+#define TRIGGER_PIN  		12 
+#define ECHO_PIN     		14 
+#define MAX_SONAR_DISTANCE 	100 
 
 
 // ----------------------------------------------------------------------------------------
@@ -56,7 +55,7 @@ const uint8_t LCD_ROWS              = 2;
 unsigned int distance; 
 float voltage;
 bool access_point_mode;
-bool useSonar;
+bool sensor_used;
 
 LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLS, LCD_ROWS);  
 
@@ -86,8 +85,10 @@ float ping_cm();
 // Inisialisasi Program
 // ----------------------------------------------------------------------------------------
 void setup(){
-	pinMode(TRIGGER_PIN, OUTPUT); // Sets the trigPin as an Output
-  	pinMode(ECHO_PIN, INPUT); // Sets the echoPin as an Input
+	
+	pinMode(TRIGGER_PIN, OUTPUT); 	// Sets the trigPin as an Output
+  	pinMode(ECHO_PIN, INPUT); 		// Sets the echoPin as an Input
+
     // Memulai Komunikasi Serial untuk keperluan Debug
     Serial.begin(DEBUG_BAUD_RATE);
   
@@ -108,13 +109,15 @@ void setup(){
 // ----------------------------------------------------------------------------------------
 void loop() {
 
-	// Baca Jarak Sebanyak 10 Kali		
-	distance = read_median(10, true);
-	useSonar = true;
-	if (distance > 100){
-    	// Baca Jarak Sebanyak 100 Kali		
-    	distance = read_median(100, false);
-    	useSonar = false;
+	// Baca Jarak dengan sensor ultrasonic sebanyak 10 Kali		
+	distance = read_median(10, SENSOR_ULTRASONIC);
+	sensor_used = SENSOR_ULTRASONIC;
+	
+	// jika jarak lebih dari jarak maksimum ultrasonik
+	if (distance > MAX_SONAR_DISTANCE){
+    	// Baca Jarak dengan sensor infrared sebanyak 100 Kali		
+    	distance = read_median(100, SENSOR_INFRARED);
+    	sensor_used = SENSOR_INFRARED;
 	}
 
     // Update Tampilan LCD 
@@ -257,7 +260,7 @@ void lcd_update(){
 
     // Tampilan jarak normal
 	if (distance != OUT_OF_RANGE)
-    text = "Jarak: " + String(distance) + "cm " + (useSonar ? "(U)" : "(I)");
+    text = "Jarak: " + String(distance) + "cm " + (sensor_used ? "(U)" : "(I)");
     
     // Tampilan jarak apabila diluar batas pengukuran
     else text = "Jarak: Out Range";
@@ -441,17 +444,19 @@ uint16_t to_infrared_distance(uint16_t value){
 //      Setelah data dirutkan menjadi 100, 150, 220, 225, 330
 //      Setelah diambil nilai tengah/median yaitu 220 cm
 // ----------------------------------------------------------------------------------------
-uint16_t read_median(uint8_t it, bool isSonar) {
+uint16_t read_median(uint8_t it, bool sensor) {
 	uint16_t dist[it], last;
 	uint8_t j, i = 0;
 	dist[0] = OUT_OF_RANGE;
 
 	while (i < it) {
-    if (isSonar)
+    
+    	if (sensor == SENSOR_ULTRASONIC)
 		  last = ping_cm();
 		else 
 		  last = read_distance_cm();  
     
+
 		if (last != OUT_OF_RANGE) {      
 			if (i > 0) {            
 				for (j = i; j > 0 && dist[j - 1] < last; j--){
