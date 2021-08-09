@@ -6,6 +6,10 @@
 Alamat Hardware dapat dilihat dari IP Address yang muncul pada LCD hardware 
 Misal IP Address Pada LCD adalah `192.168.0.100` maka alamat nya `ws://192.168.0.100`
 
+### Flowchart komunikasi aplikasi
+![Flowchart Aplikasi](Assets/flowchart-arduino.png)
+
+
 ## Arduino
 
 ### Komponen
