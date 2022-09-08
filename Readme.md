@@ -12,6 +12,11 @@ Misal IP Address Pada LCD adalah `192.168.0.100` maka alamat nya `ws://192.168.0
 
 ## Arduino
 
+![Foto Rangkaian](assets/foto-alat-1.jpg)
+![Foto Rangkaian](assets/foto-rangkaian-1.jpg)
+![Foto Rangkaian](assets/foto-rangkaian-2.jpg)
+
+
 ### Komponen
  - NodeMCU ESP8266
  - Sensor Jarak Sharp GP2Y0A710K0F 
@@ -75,3 +80,12 @@ Untuk mengetahui alamat lcd bisa menggunakan program `I2C_Address_Scaner`
 ```
 const uint8_t LCD_ADDRESS           = 0x27;
 ```
+
+## Box
+
+![Foto Box Alat](assets/foto-box-1.jpg)
+![Foto Box Alat](assets/foto-box-2.jpg)
+
+### Desain Cutting Acrylic
+Desain cutting acrilic [acrylic.cdr](https://github.com/nazililham11/measurement_tool/raw/master/Assets/acrylic.cdr) di buat menggunakan aplikasi corel draw. \
+![Desain Cutting Acrylic](assets/desain_cutting_acrylic.png)
