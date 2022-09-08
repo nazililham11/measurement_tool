@@ -81,10 +81,17 @@ Untuk mengetahui alamat lcd bisa menggunakan program `I2C_Address_Scaner`
 const uint8_t LCD_ADDRESS           = 0x27;
 ```
 
-## Box
+## Box Acrylic
+Box acrylic didesain dalam bentuk 3D dahulu untuk menentukan desain, tata letak, dan posisi dari komponen, kemudian dibuat versi 2D yang akan digunakan untuk desain potongan acrylic. Proses pembuatan box menggunakan bahan acrylic dengan tebal 2mm dan dipotong menggunakan laser.
 
 ![Foto Box Alat](Assets/foto-box-1.jpg)
 ![Foto Box Alat](Assets/foto-box-2.jpg)
+
+### Desain 3D Box Acrylic 
+Desain 3D box [box.skp](https://github.com/nazililham11/measurement_tool/raw/master/Assets/box.skp) dibuat menggunakan aplikasi google sketchup.
+![Desain 3D](Assets/box-3d-1.png)
+![Desain 3D](Assets/box-3d-2.png)
+
 
 ### Desain Cutting Acrylic
 Desain cutting acrilic [acrylic.cdr](https://github.com/nazililham11/measurement_tool/raw/master/Assets/acrylic.cdr) di buat menggunakan aplikasi corel draw. \
